@@ -3,6 +3,7 @@ package com.example.tarea01_6;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
+import java.nio.ShortBuffer;
 
 import javax.microedition.khronos.opengles.GL10;
 
@@ -39,10 +40,12 @@ public class LineStrip {
             x+3, y+2, // 14
             x+3, y+3, // 15
     };
-
-
+    /* Indices */
+    private short indices[] = new short [] {
+            3, 0, 7, 4, 11, 8, 15, 12    //l1
+    };
+    private ShortBuffer bufIndices;
     private FloatBuffer bufVertices;
-    private FloatBuffer bufColores;
 
     public LineStrip() {
         /* Lee los vértices */
@@ -52,7 +55,12 @@ public class LineStrip {
         bufVertices.put(vertices);
         bufVertices.rewind(); // puntero al principio del buffer
 
-
+        /* Lee los indices */
+        bufByte = ByteBuffer.allocateDirect(indices.length * 2);
+        bufByte.order(ByteOrder.nativeOrder()); // Utiliza el orden de byte nativo
+        bufIndices = bufByte.asShortBuffer(); // Convierte de byte a short
+        bufIndices.put(indices);
+        bufIndices.rewind(); // puntero al principio del buffer
     }
     public void dibuja(GL10 gl) {
         //gl.glClear(GL10.GL_COLOR_BUFFER_BIT);
@@ -72,8 +80,8 @@ public class LineStrip {
         //gl.glEnable(GL10.GL_LINE_SMOOTH);
         gl.glLineWidth(10);
 
-        /* Dibuja las lineas */
-        gl.glDrawArrays(GL10.GL_LINE_STRIP, 0, 16);
+        /* Renderiza las primitivas desde los datos de los arreglos (vértices, colores e índices) */
+        gl.glDrawElements(GL10.GL_LINE_STRIP, indices.length, GL10.GL_UNSIGNED_SHORT, bufIndices);
 
         /* Se deshabilita el acceso al arreglo de vértices */
         gl.glDisableClientState(GL10.GL_VERTEX_ARRAY);
